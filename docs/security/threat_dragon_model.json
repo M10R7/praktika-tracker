@@ -1,0 +1,103 @@
+{
+  "version": "2.2.0",
+  "summary": {
+    "title": "Практика-Трекер: Модуль приёма заявок и трекера",
+    "owner": "Сәбитов Азамат (АЖ-47)",
+    "description": "Модель угроз STRIDE для ключевого компонента веб-сервиса автоматизации практики студентов ФИТ"
+  },
+  "detail": {
+    "contributors": [
+      { "name": "Сәбитов Азамат" }
+    ],
+    "diagrams": [
+      {
+        "title": "DFD: Модуль приёма заявок и генерации документов",
+        "id": 0,
+        "diagramType": "STRIDE",
+        "cells": [
+          {
+            "id": "student-actor",
+            "type": "tm.Actor",
+            "data": { "name": "Студент / Внешний пользователь", "type": "tm.Actor" }
+          },
+          {
+            "id": "nginx-proc",
+            "type": "tm.Process",
+            "data": { "name": "Nginx Reverse Proxy", "type": "tm.Process" }
+          },
+          {
+            "id": "fastapi-proc",
+            "type": "tm.Process",
+            "data": { "name": "FastAPI Core Application", "type": "tm.Process" }
+          },
+          {
+            "id": "postgres-store",
+            "type": "tm.Store",
+            "data": { "name": "PostgreSQL 15 (СУБД)", "type": "tm.Store" }
+          },
+          {
+            "id": "doc-store",
+            "type": "tm.Store",
+            "data": { "name": "Хранилище договоров DOCX", "type": "tm.Store" }
+          }
+        ]
+      }
+    ],
+    "threats": [
+      {
+        "id": "TH-01",
+        "title": "Спуфинг ИИН студента и фиктивный БИН компании",
+        "type": "Spoofing",
+        "severity": "High",
+        "status": "Mitigated",
+        "description": "Подача заявки от чужого имени или с несуществующим БИН. Контрмера: валидация алгоритмом КГД РК на бэкенде.",
+        "mitigation": "Алгоритмическая проверка БИН в FastAPI, сверка ИИН с контингентом"
+      },
+      {
+        "id": "TH-02",
+        "title": "Перехват и подмена реквизитов в открытой сети",
+        "type": "Tampering",
+        "severity": "Critical",
+        "status": "Mitigated",
+        "description": "Модификация трафика в незащищённой сети Wi-Fi. Контрмера: HSTS и принудительный TLS 1.3.",
+        "mitigation": "HTTPS TLS 1.3, Certbot Let's Encrypt, HSTS max-age=31536000"
+      },
+      {
+        "id": "TH-03",
+        "title": "Отказ координатора от факта изменения статуса заявки",
+        "type": "Repudiation",
+        "severity": "Medium",
+        "status": "Open",
+        "description": "Отклонение или утверждение заявки без доказательств авторства действия. Контрмера: Audit Trail в СУБД.",
+        "mitigation": "Ведение таблицы status_audit_logs с фиксацией IP, user_id, timestamp (SEC-02)"
+      },
+      {
+        "id": "TH-04",
+        "title": "Массовый перебор ИИН через эндпоинт публичного трекера",
+        "type": "Information Disclosure",
+        "severity": "Critical",
+        "status": "Open",
+        "description": "Скриптовый сбор персональных данных перебором 12 цифр ИИН. Контрмера: Rate limiting и маскирование.",
+        "mitigation": "Rate Limiting 5 req/min, маскирование ФИО в ответе (SEC-01)"
+      },
+      {
+        "id": "TH-05",
+        "title": "DDoS и исчерпание памяти при пиковой генерации DOCX",
+        "type": "Denial of Service",
+        "severity": "High",
+        "status": "Mitigated",
+        "description": "Множественные параллельные запросы на генерацию договоров в дедлайн. Контрмера: кэширование и BackgroundTasks.",
+        "mitigation": "FastAPI BackgroundTasks, кэширование готовых файлов на диске"
+      },
+      {
+        "id": "TH-06",
+        "title": "Несанкционированное утверждение заявок без роли координатора",
+        "type": "Elevation of Privilege",
+        "severity": "Critical",
+        "status": "Mitigated",
+        "description": "Вызов защищённых эндпоинтов студентом. Контрмера: RBAC на JWT Bearer токенах.",
+        "mitigation": "Защита маршрутов через FastAPI Depends (Role.COORDINATOR)"
+      }
+    ]
+  }
+}
