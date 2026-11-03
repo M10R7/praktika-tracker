@@ -18,6 +18,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def fetch_github_actions_runs(repo: str = "kafedra-is/praktika-tracker", workflow: str = "ci.yml"):
+    """
+    Fetches workflow runs via GitHub Actions REST API if GH_TOKEN is provided.
+    Matches the reference benchmark script architecture.
+    """
+    token = os.environ.get("GH_TOKEN")
+    if not token:
+        return None
+    try:
+        import requests
+        url = f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/runs"
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = requests.get(url, headers=headers, params={"per_page": 100}, timeout=10)
+        if resp.status_code == 200:
+            return resp.json().get("workflow_runs", [])
+    except Exception:
+        pass
+    return None
+
+
 def get_git_commits(repo_dir: str):
     """Extracts commit hashes, dates, and messages from git log."""
     cmd = ["git", "log", "--pretty=format:%h|%ad|%s", "--date=iso-strict"]
