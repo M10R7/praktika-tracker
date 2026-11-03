@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: praktika_tracker_app
+    restart: always
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://tracker_user:tracker_secure_pass@db:5432/praktika_tracker_db
+      - SECRET_KEY=production-secret-key-change-in-env-file-kz-fit-2026
+      - ALLOWED_ORIGINS=http://localhost,https://praktika.fit.edu.kz
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app_storage:/app/storage
+    networks:
+      - tracker_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: praktika_tracker_db
+    restart: always
+    environment:
+      POSTGRES_USER: tracker_user
+      POSTGRES_PASSWORD: tracker_secure_pass
+      POSTGRES_DB: praktika_tracker_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker_user -d praktika_tracker_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tracker_network
+
+networks:
+  tracker_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  app_storage:

@@ -1,0 +1,58 @@
+{
+  "calculated_at": "2026-11-03T16:19:52.274404",
+  "repository": "praktika-tracker",
+  "author": "Сәбитов Азамат (гр. АЖ-47)",
+  "total_deployments": 10,
+  "observation_period_weeks": 4.9,
+  "metrics": {
+    "deployment_frequency": {
+      "value": 2.06,
+      "unit": "deploys/week",
+      "dora_classification": "High (Weekly release cadence)",
+      "target_benchmarks": {
+        "Elite": "> 7/wk",
+        "High": "1-7/wk",
+        "Medium": "1/mo - 1/wk",
+        "Low": "< 1/mo"
+      }
+    },
+    "lead_time_for_changes": {
+      "value_hours": 31.4,
+      "value_days": 1.31,
+      "unit": "days",
+      "dora_classification": "High (1-7 days)",
+      "target_benchmarks": {
+        "Elite": "< 1 day",
+        "High": "1-7 days",
+        "Medium": "1-4 weeks",
+        "Low": "> 1 month"
+      }
+    },
+    "change_failure_rate": {
+      "value_percent": 10.0,
+      "unit": "%",
+      "dora_classification": "High (0-15%)",
+      "target_benchmarks": {
+        "Elite/High": "0-15%",
+        "Medium": "16-30%",
+        "Low": "> 30%"
+      }
+    },
+    "time_to_restore_service": {
+      "value_minutes": 18.5,
+      "value_hours": 0.31,
+      "unit": "minutes",
+      "dora_classification": "High (< 1 hour)",
+      "target_benchmarks": {
+        "Elite/High": "< 1 hour",
+        "Medium": "< 1 day",
+        "Low": "> 1 week"
+      }
+    }
+  },
+  "overall_performance_level": "High Performer",
+  "key_improvement_initiatives": [
+    "1. Автоматизация развертывания на Staging-сервер PS.kz через GitHub Actions SSH Deploy Runner (устранение ручной фазы pull)",
+    "2. Внедрение динамических Feature Flags (флагов функций) для изоляции незрелых фич без отката всего контейнера"
+  ]
+}
