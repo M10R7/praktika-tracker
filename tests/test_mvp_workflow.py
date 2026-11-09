@@ -29,7 +29,7 @@ def test_submit_application_success():
     payload = {
         "student_iin": "030915500062",
         "student_fullname": "Жолдасов Нурлан Кайратович",
-        "student_email": "nurlan.zh@fit.kaznu.kz",
+        "student_email": "nurlan.zh@enu.kz",
         "student_phone": "+7 707 999 88 77",
         "student_group": "АЖ-47",
         "specialty_code": "6B06101 - Информационные системы",
@@ -55,7 +55,7 @@ def test_submit_application_invalid_bin():
     payload = {
         "student_iin": "030412500088",
         "student_fullname": "Токтаров Руслан Берикович",
-        "student_email": "ruslan.t@fit.kaznu.kz",
+        "student_email": "ruslan.t@enu.kz",
         "student_phone": "+7 707 111 22 33",
         "student_group": "ВТиПО-42",
         "specialty_code": "6B06102 - ВТиПО",

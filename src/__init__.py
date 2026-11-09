@@ -1,6 +1,6 @@
 """
 Praktika-Tracker Core Application Package
-Automated Internship Management System for FIT Al-Farabi KazNU
+Automated Internship Management System for FIT L.N. Gumilyov ENU (Astana)
 Author: Сәбитов Азамат (гр. АЖ-47)
 """
 

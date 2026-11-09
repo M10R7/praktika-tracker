@@ -4,8 +4,8 @@
   --primary-hover: #0b5ed7;
   --secondary-color: #198754;
   --accent-color: #ffc107;
-  --kaznu-blue: #004b87;
-  --kaznu-gold: #c69214;
+  --enu-blue: #003366;
+  --enu-gold: #c69214;
 }
 
 body {
@@ -21,13 +21,13 @@ main {
   flex: 1;
 }
 
-.navbar-kaznu {
-  background: linear-gradient(135deg, #003366 0%, #004b87 100%);
-  border-bottom: 3px solid var(--kaznu-gold);
+.navbar-enu {
+  background: linear-gradient(135deg, #002244 0%, #003366 100%);
+  border-bottom: 3px solid var(--enu-gold);
 }
 
 .brand-badge {
-  background-color: var(--kaznu-gold);
+  background-color: var(--enu-gold);
   color: #002244;
   font-size: 0.75rem;
   font-weight: 700;
@@ -164,5 +164,5 @@ footer {
   background-color: #0f172a;
   color: #94a3b8;
   font-size: 0.875rem;
-  border-top: 3px solid var(--kaznu-gold);
+  border-top: 3px solid var(--enu-gold);
 }

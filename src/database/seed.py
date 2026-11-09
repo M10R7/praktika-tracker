@@ -1,5 +1,5 @@
 """
-Database seeding module with realistic FIT KazNU data.
+Database seeding module with realistic FIT ENU data (Astana).
 Pre-populates accredited partner companies, students, applications, and audit logs.
 Author: Сәбитов Азамат (гр. АЖ-47)
 """
@@ -65,7 +65,7 @@ COMPANIES_SEED = [
         "bin": "940140000385",
         "name": "АО «Народный Банк Казахстана» (Halyk Bank)",
         "legal_form": "АО",
-        "address": "г. Алматы, пр. аль-Фараби, 40",
+        "address": "г. Астана, пр. Туран, 18",
         "director_name": "Шаяхметова Умут Болатхановна",
         "contact_person": "Искаков Азат (Центр ИТ-разработки)",
         "contact_phone": "+7 (727) 259-07-77",
@@ -100,7 +100,7 @@ STUDENTS_SEED = [
     {
         "iin": "030514500012",
         "full_name": "Сәбитов Азамат Ерланович",
-        "email": "azamat.sabitov@fit.kaznu.kz",
+        "email": "azamat.sabitov@enu.kz",
         "phone": "+7 (707) 812-44-55",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06101 - Информационные системы",
@@ -110,7 +110,7 @@ STUDENTS_SEED = [
     {
         "iin": "030822600023",
         "full_name": "Смагулова Динара Болатовна",
-        "email": "dinara.smagulova@fit.kaznu.kz",
+        "email": "dinara.smagulova@enu.kz",
         "phone": "+7 (701) 334-21-90",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06101 - Информационные системы",
@@ -120,7 +120,7 @@ STUDENTS_SEED = [
     {
         "iin": "031110500039",
         "full_name": "Касымов Бахтияр Даниярович",
-        "email": "bakhtiyar.kassymov@fit.kaznu.kz",
+        "email": "bakhtiyar.kassymov@enu.kz",
         "phone": "+7 (777) 112-99-88",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06102 - Вычислительная техника и ПО",
@@ -130,7 +130,7 @@ STUDENTS_SEED = [
     {
         "iin": "030219600045",
         "full_name": "Омарова Асель Сериковна",
-        "email": "asel.omarova@fit.kaznu.kz",
+        "email": "asel.omarova@enu.kz",
         "phone": "+7 (705) 556-78-12",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06101 - Информационные системы",
@@ -140,7 +140,7 @@ STUDENTS_SEED = [
     {
         "iin": "030704500055",
         "full_name": "Ахметов Дамир Муратович",
-        "email": "damir.akhmetov@fit.kaznu.kz",
+        "email": "damir.akhmetov@enu.kz",
         "phone": "+7 (702) 890-12-34",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06103 - Кибербезопасность",
@@ -150,7 +150,7 @@ STUDENTS_SEED = [
     {
         "iin": "030915500062",
         "full_name": "Жолдасов Нурлан Кайратович",
-        "email": "nurlan.zholdasov@fit.kaznu.kz",
+        "email": "nurlan.zholdasov@enu.kz",
         "phone": "+7 (747) 441-23-77",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06101 - Информационные системы",
@@ -160,7 +160,7 @@ STUDENTS_SEED = [
     {
         "iin": "031201600076",
         "full_name": "Ибрагимова Зарина Тимуровна",
-        "email": "zarina.ibragimova@fit.kaznu.kz",
+        "email": "zarina.ibragimova@enu.kz",
         "phone": "+7 (708) 991-33-45",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06101 - Информационные системы",
@@ -170,7 +170,7 @@ STUDENTS_SEED = [
     {
         "iin": "030412500088",
         "full_name": "Токтаров Руслан Берикович",
-        "email": "ruslan.toktarov@fit.kaznu.kz",
+        "email": "ruslan.toktarov@enu.kz",
         "phone": "+7 (775) 678-90-21",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06102 - Вычислительная техника и ПО",
@@ -180,7 +180,7 @@ STUDENTS_SEED = [
     {
         "iin": "031025500097",
         "full_name": "Маратов Айдар Касымович",
-        "email": "aidar.maratov@fit.kaznu.kz",
+        "email": "aidar.maratov@enu.kz",
         "phone": "+7 (701) 456-11-22",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06103 - Кибербезопасность",
@@ -190,7 +190,7 @@ STUDENTS_SEED = [
     {
         "iin": "030618500107",
         "full_name": "Кенесов Ербол Сакенович",
-        "email": "erbol.kenesov@fit.kaznu.kz",
+        "email": "erbol.kenesov@enu.kz",
         "phone": "+7 (771) 234-56-78",
         "faculty": "Факультет информационных технологий",
         "specialty_code": "6B06101 - Информационные системы",
@@ -247,7 +247,7 @@ def seed_database(db: Session):
             "company_bin": "941240000193",
             "mentor": "Алиева Жанар (Ведущий инженер)",
             "status": "in_order",
-            "supervisor": "Урмашев Б.А.",
+            "supervisor": "Шаяхметова А. К.",
         },
         # Student 3: Asel Omarova -> BTS Digital (In Order)
         {
@@ -279,7 +279,7 @@ def seed_database(db: Session):
             "company_bin": "931240001157",
             "mentor": "Байжанов Марат (Главный специалист)",
             "status": "under_review",
-            "supervisor": "Урмашев Б.А.",
+            "supervisor": "Шаяхметова А. К.",
         },
         # Student 7: Ruslan Toktarov -> KazTech (Rejected with reason - US-06)
         {
@@ -353,7 +353,7 @@ def seed_database(db: Session):
                 application_id=app.id,
                 old_status="under_review",
                 new_status=cfg["status"],
-                changed_by="Координатор практики ФИТ",
+                changed_by="Координатор практики ФИТ ЕНУ",
                 comment=cfg.get("rejection_reason")
                 or "Согласовано кафедрой ИС после проверки документов",
                 ip_address="172.16.10.12",

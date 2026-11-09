@@ -194,10 +194,10 @@ def generate_contract_docx(
     c0 = row1.cells[0].paragraphs[0]
     c0.paragraph_format.line_spacing = 1.05
     c0.add_run(
-        f"РГП на ПХВ «{settings.UNIVERSITY_NAME_RU}»\n"
+        f"НАО «{settings.UNIVERSITY_NAME_RU}»\n"
         f"{settings.FACULTY_NAME_RU}\n"
-        "г. Алматы, пр. аль-Фараби, 71\n"
-        "БИН 990140001157\n\n"
+        "г. Астана, ул. Сатпаева, 2\n"
+        "БИН 010140003011\n\n"
         f"Декан: {settings.DEAN_NAME}\n\n"
         "Подпись: ________________\n"
         "М.П."

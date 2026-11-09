@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseModel):
-    PROJECT_NAME: str = "«Практика-Трекер» ФИТ КазНУ"
+    PROJECT_NAME: str = "«Практика-Трекер» ФИТ ЕНУ"
     VERSION: str = "1.0.0 (MVP)"
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = Field(default_factory=lambda: os.getenv("ENVIRONMENT", "development"))
@@ -28,13 +28,13 @@ class Settings(BaseModel):
         )
     )
 
-    # University & Faculty Metadata
-    UNIVERSITY_NAME_RU: str = "Казахский национальный университет имени аль-Фараби"
-    UNIVERSITY_NAME_KZ: str = "Әл-Фараби атындағы Қазақ ұлттық университеті"
+    # University & Faculty Metadata (L.N. Gumilyov Eurasian National University, Astana)
+    UNIVERSITY_NAME_RU: str = "Евразийский национальный университет имени Л.Н. Гумилева"
+    UNIVERSITY_NAME_KZ: str = "Л.Н. Гумилев атындағы Еуразия ұлттық университеті"
     FACULTY_NAME_RU: str = "Факультет информационных технологий"
     FACULTY_NAME_KZ: str = "Ақпараттық технологиялар факультеті"
     FACULTY_CODE: str = "FIT"
-    DEAN_NAME: str = "Урмашев Б.А."
+    DEAN_NAME: str = "Шаяхметова А. К."
     TARGET_STUDENTS_COUNT: int = 250
     ACADEMIC_YEAR: str = "2026-2027"
 

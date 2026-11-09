@@ -1,6 +1,6 @@
 """
 Main FastAPI application for Praktika-Tracker (MVP).
-Automated Internship Management System for Faculty of Information Technology, Al-Farabi KazNU.
+Automated Internship Management System for Faculty of Information Technology, L.N. Gumilyov ENU (Astana).
 Author: Сәбитов Азамат (гр. АЖ-47)
 """
 
@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Система сквозного управления производственной практикой студентов ФИТ КазНУ имени аль-Фараби",
+    description="Система сквозного управления производственной практикой студентов ФИТ ЕНУ имени Л.Н. Гумилева (г. Астана)",
     lifespan=lifespan,
 )
 

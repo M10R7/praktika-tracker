@@ -75,7 +75,7 @@ def generate_dean_order_docx(
 
     p_meta = add_p(align=WD_ALIGN_PARAGRAPH.LEFT, space_after=8)
     p_meta.add_run(f"«{order_date}»").bold = True
-    p_meta.add_run("\t\t\t\t\t\t\tг. Алматы\t\t\t\t\t\t")
+    p_meta.add_run("\t\t\t\t\t\t\tг. Астана\t\t\t\t\t\t")
     p_meta.add_run(f"{order_number}").bold = True
 
     # Subject
