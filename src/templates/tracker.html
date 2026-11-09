@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Трекер статуса заявления | Практика-Трекер ФИТ{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="/">Главная</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Трекер статуса</li>
+        </ol>
+      </nav>
+
+      <!-- Search Box Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <h4 class="fw-bold mb-1">Отслеживание статуса заявления по ИИН</h4>
+        <p class="text-muted small mb-3">
+          Введите 12-значный индивидуальный идентификационный номер (ИИН) для проверки стадии согласования практики.
+        </p>
+        <form id="tracker-form" onsubmit="handleSearch(event)">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-person-vcard text-muted"></i>
+            </span>
+            <input type="text" id="tracker-iin" class="form-control border-start-0" placeholder="Введите 12 цифр ИИН (например: 030514500012)" maxlength="12" pattern="\d{12}" required>
+            <button class="btn btn-primary px-4 fw-semibold" type="submit" id="search-btn">
+              <i class="bi bi-search me-1"></i> Проверить
+            </button>
+          </div>
+        </form>
+        <div class="mt-2 text-muted small">
+          <i class="bi bi-shield-lock me-1 text-success"></i> Защита персональных данных (SEC-01): данные маскируются, действует ограничение частоты запросов.
+        </div>
+      </div>
+
+      <!-- Result Container -->
+      <div id="tracker-result" class="d-none">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <div class="card-header bg-white border-bottom p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div>
+                <span class="text-muted small">Номер заявления:</span>
+                <h4 class="fw-bold text-primary mb-0 font-monospace" id="app-number">ПР-2026-FIT-0000</h4>
+              </div>
+              <div class="text-end">
+                <span id="status-badge" class="badge fs-6 p-2 px-3 rounded-pill">На проверке</span>
+                <div class="small text-muted mt-1" id="updated-at">Обновлено: --</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body p-4 p-md-5">
+            <!-- Stepper Progress Bar -->
+            <div class="stepper-wrapper" id="stepper">
+              <div class="stepper-item completed" id="step-1">
+                <div class="stepper-circle"><i class="bi bi-check-lg"></i></div>
+                <div class="stepper-title">1. Подача заявления</div>
+              </div>
+              <div class="stepper-item" id="step-2">
+                <div class="stepper-circle">2</div>
+                <div class="stepper-title">2. Проверка БИН</div>
+              </div>
+              <div class="stepper-item" id="step-3">
+                <div class="stepper-circle">3</div>
+                <div class="stepper-title">3. Согласование</div>
+              </div>
+              <div class="stepper-item" id="step-4">
+                <div class="stepper-circle">4</div>
+                <div class="stepper-title">4. Договор готов</div>
+              </div>
+              <div class="stepper-item" id="step-5">
+                <div class="stepper-circle">5</div>
+                <div class="stepper-title">5. В приказе деканата</div>
+              </div>
+            </div>
+
+            <!-- Rejection Alert (US-06) -->
+            <div id="rejection-box" class="alert alert-danger d-none my-3 rounded-3" role="alert">
+              <h6 class="alert-heading fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i> Заявление отклонено координатором</h6>
+              <p class="mb-0 small" id="rejection-text"></p>
+            </div>
+
+            <!-- Details Card -->
+            <div class="p-3 rounded-3 bg-light border mb-4">
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <small class="text-muted d-block">Обучающийся (студент):</small>
+                  <strong class="text-dark" id="masked-student-name">--</strong>
+                </div>
+                <div class="col-sm-6">
+                  <small class="text-muted d-block">ИИН (маскирован):</small>
+                  <span class="font-monospace text-dark" id="masked-iin">--</span>
+                </div>
+                <div class="col-sm-6">
+                  <small class="text-muted d-block">База практики:</small>
+                  <strong class="text-dark" id="company-name">--</strong>
+                </div>
+                <div class="col-sm-6">
+                  <small class="text-muted d-block">Вид практики:</small>
+                  <span class="text-dark" id="practice-type">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons Container -->
+            <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+              <div>
+                <a href="#" id="download-contract-btn" class="btn btn-success btn-lg px-4 d-none shadow-sm">
+                  <i class="bi bi-file-earmark-word-fill me-2"></i> Скачать договор (DOCX)
+                </a>
+              </div>
+              <div>
+                <button type="button" id="upload-scan-btn" class="btn btn-outline-primary d-none" data-bs-toggle="modal" data-bs-target="#uploadScanModal">
+                  <i class="bi bi-cloud-arrow-up-fill me-1"></i> Загрузить скан с печатью
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Result / Error Card -->
+      <div id="tracker-error" class="alert alert-warning d-none rounded-4 p-4 shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-info-circle-fill fs-3 me-3 text-warning"></i>
+          <div>
+            <h5 class="alert-heading fw-bold mb-1">Заявление не найдено</h5>
+            <p class="mb-0 small" id="error-message">Проверьте правильность введенного 12-значного ИИН или подайте новое заявление.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Scan Modal (US-08) -->
+<div class="modal fade" id="uploadScanModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Загрузка скана подписанного договора</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3">
+          Прикрепите отсканированную копию или четкую фотографию договора с подписью и круглой печатью организации (PDF, PNG, JPG, до 10 МБ).
+        </p>
+        <form id="upload-scan-form" onsubmit="handleScanUpload(event)">
+          <div class="mb-3">
+            <input type="file" id="scan-file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" id="upload-submit-btn" class="btn btn-primary">
+              <i class="bi bi-upload me-1"></i> Загрузить файл
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentAppId = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const iinParam = params.get("iin");
+  if (iinParam && iinParam.length === 12) {
+    document.getElementById("tracker-iin").value = iinParam;
+    executeTrackerLookup(iinParam);
+  }
+});
+
+function handleSearch(e) {
+  e.preventDefault();
+  const iin = document.getElementById("tracker-iin").value.trim();
+  executeTrackerLookup(iin);
+}
+
+async function executeTrackerLookup(iin) {
+  const btn = document.getElementById("search-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Поиск...`;
+
+  const resultBox = document.getElementById("tracker-result");
+  const errorBox = document.getElementById("tracker-error");
+  resultBox.classList.add("d-none");
+  errorBox.classList.add("d-none");
+
+  try {
+    const res = await fetch(`/api/v1/tracker?iin=${encodeURIComponent(iin)}`);
+    if (res.ok) {
+      const data = await res.json();
+      renderTrackerData(data);
+      resultBox.classList.remove("d-none");
+    } else {
+      const err = await res.json();
+      document.getElementById("error-message").textContent = err.detail || "Заявка с указанным ИИН не найдена.";
+      errorBox.classList.remove("d-none");
+    }
+  } catch (err) {
+    document.getElementById("error-message").textContent = "Ошибка связи с сервером. Попробуйте позже.";
+    errorBox.classList.remove("d-none");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-search me-1"></i> Проверить`;
+  }
+}
+
+function renderTrackerData(data) {
+  document.getElementById("app-number").textContent = data.application_number;
+  document.getElementById("masked-student-name").textContent = data.masked_student_name;
+  document.getElementById("masked-iin").textContent = data.masked_iin;
+  document.getElementById("company-name").textContent = data.company_name;
+  document.getElementById("practice-type").textContent = data.practice_type;
+  document.getElementById("updated-at").textContent = `Обновлено: ${data.updated_at}`;
+
+  // Status badge
+  const badge = document.getElementById("status-badge");
+  badge.className = `badge fs-6 p-2 px-3 rounded-pill badge-status-${data.status}`;
+  badge.textContent = data.status_label_ru;
+
+  // Stepper update
+  const step = data.status_step;
+  const isRejected = (data.status === "rejected");
+
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`step-${i}`);
+    el.classList.remove("completed", "active");
+    if (!isRejected) {
+      if (i < step) {
+        el.classList.add("completed");
+        el.querySelector(".stepper-circle").innerHTML = '<i class="bi bi-check-lg"></i>';
+      } else if (i === step) {
+        el.classList.add("active");
+        el.querySelector(".stepper-circle").textContent = i;
+      } else {
+        el.querySelector(".stepper-circle").textContent = i;
+      }
+    }
+  }
+
+  // Rejection box
+  const rejBox = document.getElementById("rejection-box");
+  if (isRejected) {
+    rejBox.classList.remove("d-none");
+    document.getElementById("rejection-text").textContent = data.rejection_reason || "Причина не указана";
+  } else {
+    rejBox.classList.add("d-none");
+  }
+
+  // Contract download button
+  const dlBtn = document.getElementById("download-contract-btn");
+  const upBtn = document.getElementById("upload-scan-btn");
+
+  // We can fetch application ID by app_number if needed or download via direct route
+  if (data.status === "approved" || data.status === "in_order" || data.has_contract_doc) {
+    dlBtn.classList.remove("d-none");
+    // Extract app sequence from number e.g. ПР-2026-FIT-0001
+    const parts = data.application_number.split("-");
+    const num = parseInt(parts[parts.length - 1]);
+    dlBtn.href = `/api/v1/applications/${num}/download-docx`;
+    currentAppId = num;
+    upBtn.classList.remove("d-none");
+  } else {
+    dlBtn.classList.add("d-none");
+    upBtn.classList.add("d-none");
+  }
+}
+
+async function handleScanUpload(e) {
+  e.preventDefault();
+  if (!currentAppId) return;
+
+  const fileInput = document.getElementById("scan-file");
+  if (!fileInput.files.length) return;
+
+  const btn = document.getElementById("upload-submit-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Загрузка...`;
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  try {
+    const res = await fetch(`/api/v1/applications/${currentAppId}/upload-scan`, {
+      method: "POST",
+      body: formData,
+    });
+    if (res.ok) {
+      showToast("Скан подписанного договора успешно загружен!", "success");
+      bootstrap.Modal.getInstance(document.getElementById("uploadScanModal")).hide();
+      document.getElementById("upload-scan-form").reset();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || "Ошибка загрузки файла", "error");
+    }
+  } catch (err) {
+    showToast("Сбой сети при отправке файла", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-upload me-1"></i> Загрузить файл`;
+  }
+}
+</script>
+{% endblock %}

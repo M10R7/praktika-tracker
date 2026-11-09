@@ -44,3 +44,16 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Databases & Local runtime storage
+*.db
+*.sqlite
+*.sqlite3
+storage/*
+!storage/contracts/
+storage/contracts/*
+!storage/contracts/.gitkeep
+!storage/documents/
+storage/documents/*
+!storage/documents/.gitkeep
+

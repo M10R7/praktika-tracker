@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Подать заявку на практику | Практика-Трекер ФИТ{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="/">Главная</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Подать заявку</li>
+        </ol>
+      </nav>
+
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="bg-primary text-white p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-3 bg-white bg-opacity-25 p-3">
+              <i class="bi bi-file-earmark-plus-fill fs-2"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-1">Подача заявления на производственную практику</h3>
+              <p class="mb-0 text-white-50 small">
+                Заполните данные студента и реквизиты предприятия. Система автоматически проверит БИН и сформирует проект договора.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <form id="apply-form" onsubmit="handleApplicationSubmit(event)">
+            <!-- 1. Student Details Section -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+              <i class="bi bi-person-fill text-primary me-2"></i> 1. Данные обучающегося (Студента)
+            </h5>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">ФИО полностью <span class="text-danger">*</span></label>
+                <input type="text" id="student_fullname" class="form-control" placeholder="Например: Сәбитов Азамат Ерланович" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">ИИН (12 цифр) <span class="text-danger">*</span></label>
+                <input type="text" id="student_iin" class="form-control" placeholder="12 цифр" maxlength="12" pattern="\d{12}" onblur="checkIinField(this)" required>
+                <div id="iin-feedback" class="form-text small"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Корпоративный Email <span class="text-danger">*</span></label>
+                <input type="email" id="student_email" class="form-control" placeholder="student@fit.kaznu.kz" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Контактный телефон <span class="text-danger">*</span></label>
+                <input type="tel" id="student_phone" class="form-control" placeholder="+7 (707) 000-00-00" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Академическая группа <span class="text-danger">*</span></label>
+                <select id="student_group" class="form-select" required>
+                  <option value="АЖ-47" selected>АЖ-47 (Информационные системы)</option>
+                  <option value="ИС-41">ИС-41 (Информационные системы)</option>
+                  <option value="ВТиПО-42">ВТиПО-42 (Вычислительная техника)</option>
+                  <option value="ИБ-43">ИБ-43 (Информационная безопасность)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Специальность (ОП) <span class="text-danger">*</span></label>
+                <input type="text" id="specialty_code" class="form-control" value="6B06101 - Информационные системы" required>
+              </div>
+            </div>
+
+            <!-- 2. Company Details Section -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+              <i class="bi bi-building-fill text-primary me-2"></i> 2. База практики (Организация / Предприятие)
+            </h5>
+
+            <!-- Option Tabs: Choose Partner vs Custom -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Способ выбора базы практики:</label>
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="company_mode" id="mode-partner" value="partner" checked onchange="toggleCompanyMode('partner')">
+                <label class="btn btn-outline-primary" for="mode-partner">
+                  <i class="bi bi-star-fill me-1"></i> Выбрать из проверенных партнеров кафедры
+                </label>
+
+                <input type="radio" class="btn-check" name="company_mode" id="mode-custom" value="custom" onchange="toggleCompanyMode('custom')">
+                <label class="btn btn-outline-primary" for="mode-custom">
+                  <i class="bi bi-pencil me-1"></i> Ввести свою организацию
+                </label>
+              </div>
+            </div>
+
+            <!-- Partner select dropdown -->
+            <div id="partner-select-block" class="mb-3">
+              <label class="form-label fw-semibold">Выберите компанию-партнера:</label>
+              <select id="partner_company_select" class="form-select form-select-lg" onchange="handlePartnerSelect(this)">
+                <option value="">-- Загрузка списка партнеров... --</option>
+              </select>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">БИН организации (12 цифр) <span class="text-danger">*</span></label>
+                <input type="text" id="company_bin" class="form-control font-monospace" placeholder="12 цифр БИН" maxlength="12" pattern="\d{12}" onblur="checkBinField(this)" required>
+                <div id="bin-feedback" class="form-text small"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Наименование организации <span class="text-danger">*</span></label>
+                <input type="text" id="company_name" class="form-control" placeholder="Например: ТОО «Kolesa Group»" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Юридический адрес</label>
+                <input type="text" id="company_address" class="form-control" placeholder="г. Алматы, ул. ..." value="г. Алматы">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">ФИО руководителя от базы практики <span class="text-danger">*</span></label>
+                <input type="text" id="mentor_fullname" class="form-control" placeholder="ФИО наставника (ментора)" required>
+              </div>
+            </div>
+
+            <!-- 3. Practice Parameters -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+              <i class="bi bi-calendar-range-fill text-primary me-2"></i> 3. Сроки и параметры практики
+            </h5>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Вид практики</label>
+                <select id="practice_type" class="form-select">
+                  <option value="Өндірістік практика / Производственная практика" selected>Производственная практика</option>
+                  <option value="Диплом алды практика / Преддипломная практика">Преддипломная практика</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Руководитель от кафедры</label>
+                <input type="text" id="academic_supervisor" class="form-control" value="Самбетбаева Мадина Аралбаевна">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Дата начала</label>
+                <input type="date" id="start_date" class="form-control" value="2026-06-01" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Дата окончания</label>
+                <input type="date" id="end_date" class="form-control" value="2026-07-15" required>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-3 bg-light border mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="terms" required>
+                <label class="form-check-label small" for="terms">
+                  Подтверждаю достоверность введенных данных и выражаю согласие на обработку персональных данных в соответствии с Законом РК № 94-V.
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-end gap-2">
+              <a href="/" class="btn btn-light px-4">Отмена</a>
+              <button type="submit" id="submit-btn" class="btn btn-primary btn-lg px-5 shadow-sm">
+                <i class="bi bi-send-check me-2"></i> Отправить заявление
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-body p-4 text-center">
+        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex p-3 mb-3">
+          <i class="bi bi-check-circle-fill display-4"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Заявление успешно зарегистрировано!</h4>
+        <p class="text-muted small mb-3">
+          Ваша заявка направлена на рассмотрение координатору практики кафедры.
+        </p>
+        <div class="p-3 bg-light rounded-3 border mb-3">
+          <small class="text-muted d-block mb-1">Номер вашей заявки:</small>
+          <h3 class="fw-bold text-primary mb-0 font-monospace" id="modal-app-num">ПР-2026-FIT-0000</h3>
+        </div>
+        <div class="d-grid gap-2">
+          <a href="#" id="modal-tracker-link" class="btn btn-primary btn-lg">
+            <i class="bi bi-search me-1"></i> Перейти в трекер статуса
+          </a>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let partnerCompanies = [];
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("/api/v1/companies?partner_only=true");
+    if (res.ok) {
+      partnerCompanies = await res.json();
+      const select = document.getElementById("partner_company_select");
+      select.innerHTML = '<option value="">-- Выберите организацию из списка --</option>';
+      partnerCompanies.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = `${c.name} (БИН: ${c.bin})`;
+        select.appendChild(opt);
+      });
+    }
+  } catch (err) {
+    console.error("Failed to load companies:", err);
+  }
+});
+
+function toggleCompanyMode(mode) {
+  const partnerBlock = document.getElementById("partner-select-block");
+  const binInput = document.getElementById("company_bin");
+  const nameInput = document.getElementById("company_name");
+  const addressInput = document.getElementById("company_address");
+
+  if (mode === "partner") {
+    partnerBlock.classList.remove("d-none");
+    binInput.readOnly = true;
+    nameInput.readOnly = true;
+    addressInput.readOnly = true;
+  } else {
+    partnerBlock.classList.add("d-none");
+    binInput.readOnly = false;
+    nameInput.readOnly = false;
+    addressInput.readOnly = false;
+    binInput.value = "";
+    nameInput.value = "";
+    addressInput.value = "г. Алматы";
+    document.getElementById("partner_company_select").value = "";
+  }
+}
+
+function handlePartnerSelect(select) {
+  const compId = parseInt(select.value);
+  const comp = partnerCompanies.find(c => c.id === compId);
+  if (comp) {
+    document.getElementById("company_bin").value = comp.bin;
+    document.getElementById("company_name").value = comp.name;
+    document.getElementById("company_address").value = comp.address;
+    if (comp.contact_person) {
+      document.getElementById("mentor_fullname").value = comp.contact_person;
+    }
+    checkBinField(document.getElementById("company_bin"));
+  }
+}
+
+function checkBinField(input) {
+  const fb = document.getElementById("bin-feedback");
+  const val = input.value.trim();
+  if (val.length === 12) {
+    const check = validateBinLocal(val);
+    if (check.valid) {
+      input.classList.remove("is-invalid");
+      input.classList.add("is-valid");
+      fb.className = "form-text text-success";
+      fb.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${check.message}`;
+    } else {
+      input.classList.remove("is-valid");
+      input.classList.add("is-invalid");
+      fb.className = "form-text text-danger";
+      fb.innerHTML = `<i class="bi bi-x-circle me-1"></i> ${check.message}`;
+    }
+  } else {
+    input.classList.remove("is-valid", "is-invalid");
+    fb.textContent = "БИН должен состоять из 12 цифр";
+    fb.className = "form-text small";
+  }
+}
+
+function checkIinField(input) {
+  const fb = document.getElementById("iin-feedback");
+  const val = input.value.trim();
+  if (val.length === 12) {
+    const check = validateIinLocal(val);
+    if (check.valid) {
+      input.classList.remove("is-invalid");
+      input.classList.add("is-valid");
+      fb.className = "form-text text-success";
+      fb.innerHTML = `<i class="bi bi-check-circle me-1"></i> ИИН корректен`;
+    } else {
+      input.classList.remove("is-valid");
+      input.classList.add("is-invalid");
+      fb.className = "form-text text-danger";
+      fb.innerHTML = `<i class="bi bi-x-circle me-1"></i> ${check.message}`;
+    }
+  }
+}
+
+async function handleApplicationSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Отправка...`;
+
+  const payload = {
+    student_fullname: document.getElementById("student_fullname").value.trim(),
+    student_iin: document.getElementById("student_iin").value.trim(),
+    student_email: document.getElementById("student_email").value.trim(),
+    student_phone: document.getElementById("student_phone").value.trim(),
+    student_group: document.getElementById("student_group").value,
+    specialty_code: document.getElementById("specialty_code").value.trim(),
+    company_id: parseInt(document.getElementById("partner_company_select").value) || null,
+    company_bin: document.getElementById("company_bin").value.trim(),
+    company_name: document.getElementById("company_name").value.trim(),
+    company_address: document.getElementById("company_address").value.trim(),
+    mentor_fullname: document.getElementById("mentor_fullname").value.trim(),
+    academic_supervisor: document.getElementById("academic_supervisor").value.trim(),
+    practice_type: document.getElementById("practice_type").value,
+    start_date: document.getElementById("start_date").value,
+    end_date: document.getElementById("end_date").value,
+  };
+
+  try {
+    const res = await fetch("/api/v1/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById("modal-app-num").textContent = data.application_number;
+      document.getElementById("modal-tracker-link").href = `/tracker?iin=${encodeURIComponent(payload.student_iin)}`;
+      const modal = new bootstrap.Modal(document.getElementById("successModal"));
+      modal.show();
+      document.getElementById("apply-form").reset();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || "Ошибка при регистрации заявления", "error");
+    }
+  } catch (err) {
+    showToast("Ошибка сети при отправке данных", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-send-check me-2"></i> Отправить заявление`;
+  }
+}
+</script>
+{% endblock %}

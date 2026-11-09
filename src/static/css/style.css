@@ -1,0 +1,168 @@
+/* Custom CSS styles for Praktika-Tracker (MVP) */
+:root {
+  --primary-color: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --secondary-color: #198754;
+  --accent-color: #ffc107;
+  --kaznu-blue: #004b87;
+  --kaznu-gold: #c69214;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+main {
+  flex: 1;
+}
+
+.navbar-kaznu {
+  background: linear-gradient(135deg, #003366 0%, #004b87 100%);
+  border-bottom: 3px solid var(--kaznu-gold);
+}
+
+.brand-badge {
+  background-color: var(--kaznu-gold);
+  color: #002244;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6effa 100%);
+  border-bottom: 1px solid #dbeafe;
+  padding: 3rem 0;
+}
+
+.stat-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* Timeline Stepper for Public Tracker */
+.stepper-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.stepper-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stepper-item::before {
+  position: absolute;
+  content: "";
+  border-bottom: 3px solid #cbd5e1;
+  width: 100%;
+  top: 20px;
+  left: -50%;
+  z-index: 1;
+}
+
+.stepper-item:first-child::before {
+  content: none;
+}
+
+.stepper-item.completed::before {
+  border-bottom: 3px solid #10b981;
+}
+
+.stepper-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.stepper-item.completed .stepper-circle {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.stepper-item.active .stepper-circle {
+  background-color: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px #bae6fd;
+}
+
+.stepper-title {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  color: #64748b;
+}
+
+.stepper-item.active .stepper-title,
+.stepper-item.completed .stepper-title {
+  color: #0f172a;
+}
+
+/* Badges for status */
+.badge-status-draft { background-color: #64748b; color: white; }
+.badge-status-under_review { background-color: #f59e0b; color: white; }
+.badge-status-approved { background-color: #10b981; color: white; }
+.badge-status-in_order { background-color: #0284c7; color: white; }
+.badge-status-rejected { background-color: #ef4444; color: white; }
+.badge-status-completed { background-color: #059669; color: white; }
+
+/* Table styling */
+.custom-table th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.custom-table td {
+  vertical-align: middle;
+}
+
+/* Footer */
+footer {
+  background-color: #0f172a;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  border-top: 3px solid var(--kaznu-gold);
+}

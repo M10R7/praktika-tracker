@@ -1,0 +1,608 @@
+{% extends "base.html" %}
+
+{% block title %}Кабинет координатора практики | Практика-Трекер ФИТ{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <!-- Title & Top Actions -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+      <h3 class="fw-bold mb-1">
+        <i class="bi bi-speedometer2 text-primary me-2"></i> Панель координатора практики ФИТ
+      </h3>
+      <p class="text-muted small mb-0">
+        Управление очередью заявлений, согласование баз практики, выпуск приказов деканата и аудит.
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <!-- Generate Dean's Order Button -->
+      <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#orderModal">
+        <i class="bi bi-file-earmark-ruled-fill me-1"></i> Сформировать приказ (DOCX)
+      </button>
+
+      <!-- Export CSV Button (US-10) -->
+      <a href="/api/v1/export/csv" class="btn btn-outline-success">
+        <i class="bi bi-file-earmark-excel-fill me-1"></i> Выгрузить реестр в CSV
+      </a>
+
+      <!-- Refresh Button -->
+      <button type="button" class="btn btn-light border" onclick="loadApplications()">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Telemetry Counters Row -->
+  <div class="row g-3 mb-4" id="coordinator-stats">
+    <div class="col-xl col-md-4 col-sm-6">
+      <div class="stat-card p-3 border-start border-primary border-4">
+        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Всего заявлений</small>
+        <h3 class="fw-bold mb-0 mt-1" id="stat-c-total">0</h3>
+      </div>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+      <div class="stat-card p-3 border-start border-warning border-4">
+        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">На проверке (WIP)</small>
+        <h3 class="fw-bold mb-0 mt-1 text-warning" id="stat-c-review">0</h3>
+      </div>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+      <div class="stat-card p-3 border-start border-success border-4">
+        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Согласовано</small>
+        <h3 class="fw-bold mb-0 mt-1 text-success" id="stat-c-approved">0</h3>
+      </div>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+      <div class="stat-card p-3 border-start border-info border-4">
+        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">В приказе деканата</small>
+        <h3 class="fw-bold mb-0 mt-1 text-info" id="stat-c-order">0</h3>
+      </div>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+      <div class="stat-card p-3 border-start border-danger border-4">
+        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Отклонено</small>
+        <h3 class="fw-bold mb-0 mt-1 text-danger" id="stat-c-rejected">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tabs Navigation -->
+  <ul class="nav nav-pills mb-3 border-bottom pb-2 gap-2" id="coordTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active px-4 py-2" id="apps-tab" data-bs-toggle="tab" data-bs-target="#apps-content" type="button" role="tab">
+        <i class="bi bi-list-task me-1"></i> Очередь заявлений
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link px-4 py-2" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-content" type="button" role="tab" onclick="loadDeanOrders()">
+        <i class="bi bi-file-earmark-text me-1"></i> Реестр приказов деканата
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link px-4 py-2" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit-content" type="button" role="tab" onclick="loadAuditHistory()">
+        <i class="bi bi-shield-check me-1"></i> Журнал аудита (SEC-02)
+      </button>
+    </li>
+  </ul>
+
+  <!-- Tab Contents -->
+  <div class="tab-content" id="coordTabContent">
+    <!-- TAB 1: Applications Queue -->
+    <div class="tab-pane fade show active" id="apps-content" role="tabpanel">
+      <!-- Filter Bar Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-5">
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+              <input type="text" id="filter-search" class="form-control border-start-0" placeholder="Поиск по ФИО, ИИН, компании или номеру..." oninput="debounce(loadApplications, 300)()">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select id="filter-status" class="form-select" onchange="loadApplications()">
+              <option value="">Все статусы</option>
+              <option value="under_review">На проверке</option>
+              <option value="approved">Согласовано</option>
+              <option value="in_order">В приказе</option>
+              <option value="rejected">Отклонено</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select id="filter-group" class="form-select" onchange="loadApplications()">
+              <option value="">Все академические группы</option>
+              <option value="АЖ-47">АЖ-47</option>
+              <option value="ИС-41">ИС-41</option>
+              <option value="ВТиПО-42">ВТиПО-42</option>
+              <option value="ИБ-43">ИБ-43</option>
+            </select>
+          </div>
+          <div class="col-md-1 text-end">
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" title="Сбросить фильтры">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applications Table Card -->
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+          <table class="table custom-table table-hover mb-0" id="applications-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">№ Заявки</th>
+                <th>Студент</th>
+                <th>Группа</th>
+                <th>База практики (Организация)</th>
+                <th>Сроки</th>
+                <th>Статус</th>
+                <th style="width: 220px;" class="text-end">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="applications-tbody">
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <div class="spinner-border spinner-border-sm text-primary me-2"></div> Загрузка очереди...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Orders List -->
+    <div class="tab-pane fade" id="orders-content" role="tabpanel">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h5 class="fw-bold mb-3">Сформированные сводные приказы декана ФИТ</h5>
+        <div class="table-responsive">
+          <table class="table custom-table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Номер приказа</th>
+                <th>Дата приказа</th>
+                <th>Учебный год</th>
+                <th>Факультет</th>
+                <th>Кол-во студентов</th>
+                <th>Дата генерации</th>
+                <th class="text-end">Скачать</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr><td colspan="7" class="text-center py-4 text-muted">Загрузка приказов...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Audit Trail Log -->
+    <div class="tab-pane fade" id="audit-content" role="tabpanel">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="fw-bold mb-0">Неизменяемый журнал аудита статусов (Audit Trail)</h5>
+            <small class="text-muted">Требование безопасности SEC-02 & НФТ-07 (Append-only лог)</small>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadAuditHistory()">
+            <i class="bi bi-arrow-clockwise me-1"></i> Обновить
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table custom-table table-sm table-striped mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Время (UTC)</th>
+                <th>№ Заявки</th>
+                <th>Переход статуса</th>
+                <th>Автор изменения</th>
+                <th>IP-адрес</th>
+                <th>Комментарий / Причина</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody">
+              <tr><td colspan="7" class="text-center py-4 text-muted">Загрузка журнала аудита...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reject Application (US-06) -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger">
+          <i class="bi bi-x-circle me-1"></i> Отклонение заявления
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-2">
+          В соответствии с регламентом (US-06), для отклонения заявления обязательно указать аргументированную причину.
+        </p>
+        <form id="reject-form" onsubmit="handleRejectSubmit(event)">
+          <input type="hidden" id="reject-app-id">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Причина отклонения <span class="text-danger">*</span></label>
+            <textarea id="reject-reason" class="form-control" rows="3" placeholder="Например: Несоответствие профиля деятельности компании специальности студента..." required></textarea>
+          </div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
+            <button type="submit" class="btn btn-danger">Отклонить заявление</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Generate Dean's Order (US-11) -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-file-earmark-ruled text-primary me-2"></i> Формирование приказа деканата
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3">
+          Система автоматически сгруппирует всех согласованных студентов по базам практики в алфавитном порядке и сформирует официальный DOCX файл.
+        </p>
+        <form id="order-form" onsubmit="handleOrderGenerate(event)">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Номер приказа</label>
+            <input type="text" id="order_number" class="form-control" value="№ 142-П" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Дата приказа</label>
+            <input type="text" id="order_date" class="form-control" value="25.05.2026" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Учебный год</label>
+            <input type="text" id="academic_year" class="form-control" value="2026-2027" required>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="submit" id="order-submit-btn" class="btn btn-primary btn-lg">
+              <i class="bi bi-file-earmark-word me-1"></i> Сгенерировать DOCX приказ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Unassigned Students Warning (US-11 criteria) -->
+<div class="modal fade" id="unassignedModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header bg-warning bg-opacity-10 border-0">
+        <h5 class="modal-title fw-bold text-dark">
+          <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Приказ сформирован. Отчёт по нераспределенным студентам
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-2">
+          Приказ успешно создан и скачивается. Следующие обучающиеся не вошли в приказ, так как не имеют согласованной базы практики:
+        </p>
+        <div class="p-3 bg-light rounded-3 border" style="max-height: 250px; overflow-y: auto;">
+          <ul class="list-group list-group-flush small" id="unassigned-list">
+            <!-- Injected via JS -->
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Понятно</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allApplications = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadStats();
+  loadApplications();
+});
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch("/api/v1/stats");
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById("stat-c-total").textContent = data.total_applications;
+      document.getElementById("stat-c-review").textContent = data.under_review_count;
+      document.getElementById("stat-c-approved").textContent = data.approved_count;
+      document.getElementById("stat-c-order").textContent = data.in_order_count;
+      document.getElementById("stat-c-rejected").textContent = data.rejected_count;
+    }
+  } catch (err) {
+    console.error("Stats error:", err);
+  }
+}
+
+async function loadApplications() {
+  const tbody = document.getElementById("applications-tbody");
+  const statusFilter = document.getElementById("filter-status").value;
+  const groupFilter = document.getElementById("filter-group").value;
+  const search = document.getElementById("filter-search").value.trim();
+
+  let url = `/api/v1/applications?`;
+  if (statusFilter) url += `status=${encodeURIComponent(statusFilter)}&`;
+  if (groupFilter) url += `group=${encodeURIComponent(groupFilter)}&`;
+  if (search) url += `search=${encodeURIComponent(search)}&`;
+
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      allApplications = await res.json();
+      renderApplicationsTable(allApplications);
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки очереди</td></tr>`;
+  }
+}
+
+function renderApplicationsTable(apps) {
+  const tbody = document.getElementById("applications-tbody");
+  if (!apps.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">Заявления не найдены</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = apps.map(app => {
+    const stBadge = `<span class="badge badge-status-${app.status} px-2 py-1">${getStatusLabel(app.status)}</span>`;
+    const docxBtn = (app.status === 'approved' || app.status === 'in_order' || app.contract_file_path)
+      ? `<a href="/api/v1/applications/${app.id}/download-docx" class="btn btn-sm btn-outline-success" title="Скачать договор DOCX"><i class="bi bi-file-earmark-word"></i></a>`
+      : '';
+
+    let actions = '';
+    if (app.status === 'under_review') {
+      actions = `
+        <button class="btn btn-sm btn-success me-1" onclick="changeStatus(${app.id}, 'approved')" title="Одобрить заявление">
+          <i class="bi bi-check-lg"></i> Одобрить
+        </button>
+        <button class="btn btn-sm btn-outline-danger me-1" onclick="openRejectModal(${app.id})" title="Отклонить">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      `;
+    }
+
+    return `
+      <tr>
+        <td class="font-monospace fw-semibold text-primary">${app.application_number}</td>
+        <td>
+          <div class="fw-bold">${app.student.full_name}</div>
+          <small class="text-muted font-monospace">ИИН: ${app.student.iin}</small>
+        </td>
+        <td><span class="badge bg-light text-dark border">${app.student.group_code}</span></td>
+        <td>
+          <div>${app.company.name}</div>
+          <small class="text-muted font-monospace">БИН: ${app.company.bin}</small>
+        </td>
+        <td class="small">${app.start_date} &ndash;<br>${app.end_date}</td>
+        <td>${stBadge}</td>
+        <td class="text-end text-nowrap">
+          ${actions}
+          ${docxBtn}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function getStatusLabel(status) {
+  const map = {
+    draft: "Черновик",
+    under_review: "На проверке",
+    approved: "Согласовано",
+    in_order: "В приказе",
+    rejected: "Отклонено",
+    completed: "Завершено",
+  };
+  return map[status] || status;
+}
+
+function resetFilters() {
+  document.getElementById("filter-status").value = "";
+  document.getElementById("filter-group").value = "";
+  document.getElementById("filter-search").value = "";
+  loadApplications();
+}
+
+async function changeStatus(appId, newStatus) {
+  try {
+    const res = await fetch(`/api/v1/applications/${appId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_status: newStatus, comment: "Согласовано координатором" }),
+    });
+    if (res.ok) {
+      showToast("Статус заявления успешно обновлен!", "success");
+      loadStats();
+      loadApplications();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || "Ошибка смены статуса", "error");
+    }
+  } catch (err) {
+    showToast("Сбой сети", "error");
+  }
+}
+
+function openRejectModal(appId) {
+  document.getElementById("reject-app-id").value = appId;
+  document.getElementById("reject-reason").value = "";
+  new bootstrap.Modal(document.getElementById("rejectModal")).show();
+}
+
+async function handleRejectSubmit(e) {
+  e.preventDefault();
+  const appId = document.getElementById("reject-app-id").value;
+  const reason = document.getElementById("reject-reason").value.trim();
+
+  try {
+    const res = await fetch(`/api/v1/applications/${appId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_status: "rejected", rejection_reason: reason }),
+    });
+    if (res.ok) {
+      showToast("Заявление отклонено с фиксацией причины", "warning");
+      bootstrap.Modal.getInstance(document.getElementById("rejectModal")).hide();
+      loadStats();
+      loadApplications();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || "Ошибка", "error");
+    }
+  } catch (err) {
+    showToast("Сбой сети", "error");
+  }
+}
+
+async function handleOrderGenerate(e) {
+  e.preventDefault();
+  const btn = document.getElementById("order-submit-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Генерация приказа...`;
+
+  const payload = {
+    order_number: document.getElementById("order_number").value.trim(),
+    order_date: document.getElementById("order_date").value.trim(),
+    academic_year: document.getElementById("academic_year").value.trim(),
+  };
+
+  try {
+    const res = await fetch("/api/v1/orders/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      bootstrap.Modal.getInstance(document.getElementById("orderModal")).hide();
+      showToast(`Приказ ${data.order_number} сформирован (${data.total_students} студентов)`, "success");
+
+      // Auto trigger download
+      window.location.href = `/api/v1/orders/${data.id}/download`;
+
+      // Show unassigned modal if any (US-11 criteria)
+      if (data.unassigned_students && data.unassigned_students.length > 0) {
+        const uList = document.getElementById("unassigned-list");
+        uList.innerHTML = data.unassigned_students.map(s => `<li class="list-group-item text-danger py-1"><i class="bi bi-person-x me-2"></i> ${s}</li>`).join('');
+        new bootstrap.Modal(document.getElementById("unassignedModal")).show();
+      }
+
+      loadStats();
+      loadApplications();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || "Ошибка генерации приказа", "error");
+    }
+  } catch (err) {
+    showToast("Сбой сети при генерации приказа", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-file-earmark-word me-1"></i> Сгенерировать DOCX приказ`;
+  }
+}
+
+async function loadDeanOrders() {
+  const tbody = document.getElementById("orders-tbody");
+  try {
+    const res = await fetch("/api/v1/orders");
+    if (res.ok) {
+      const orders = await res.json();
+      if (!orders.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Приказы еще не формировались</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td class="fw-bold">${o.order_number}</td>
+          <td>${o.order_date}</td>
+          <td>${o.academic_year}</td>
+          <td>${o.faculty}</td>
+          <td><span class="badge bg-primary rounded-pill px-2 py-1">${o.total_students} студ.</span></td>
+          <td class="small text-muted">${new Date(o.created_at).toLocaleDateString()}</td>
+          <td class="text-end">
+            <a href="/api/v1/orders/${o.id}/download" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-download me-1"></i> Скачать DOCX
+            </a>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки</td></tr>`;
+  }
+}
+
+async function loadAuditHistory() {
+  const tbody = document.getElementById("audit-tbody");
+  try {
+    // Load applications and extract audit logs
+    const res = await fetch("/api/v1/applications");
+    if (res.ok) {
+      const apps = await res.json();
+      let allLogs = [];
+      apps.forEach(a => {
+        if (a.audit_logs && a.audit_logs.length) {
+          a.audit_logs.forEach(l => {
+            allLogs.push({ ...l, app_number: a.application_number });
+          });
+        }
+      });
+      allLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      if (!allLogs.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Журнал аудита пуст</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = allLogs.map(l => `
+        <tr>
+          <td class="text-muted font-monospace small">#${l.id}</td>
+          <td class="small">${new Date(l.created_at).toLocaleString()}</td>
+          <td class="font-monospace text-primary fw-semibold">${l.app_number}</td>
+          <td>
+            <span class="badge bg-secondary">${l.old_status || 'новый'}</span> &rarr;
+            <span class="badge bg-primary">${l.new_status}</span>
+          </td>
+          <td><small class="fw-semibold">${l.changed_by}</small></td>
+          <td><span class="font-monospace small text-muted">${l.ip_address}</span></td>
+          <td class="small text-muted">${l.comment || '&mdash;'}</td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки аудита</td></tr>`;
+  }
+}
+</script>
+{% endblock %}

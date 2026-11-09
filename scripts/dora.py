@@ -14,6 +14,7 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,6 +29,7 @@ def fetch_github_actions_runs(repo: str = "kafedra-is/praktika-tracker", workflo
         return None
     try:
         import requests
+
         url = f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/runs"
         headers = {"Authorization": f"Bearer {token}"}
         resp = requests.get(url, headers=headers, params={"per_page": 100}, timeout=10)
@@ -48,11 +50,13 @@ def get_git_commits(repo_dir: str):
             continue
         parts = line.split("|", 2)
         if len(parts) == 3:
-            commits.append({
-                "hash": parts[0],
-                "date": datetime.fromisoformat(parts[1]),
-                "subject": parts[2],
-            })
+            commits.append(
+                {
+                    "hash": parts[0],
+                    "date": datetime.fromisoformat(parts[1]),
+                    "subject": parts[2],
+                }
+            )
     return sorted(commits, key=lambda x: x["date"])
 
 
@@ -97,14 +101,24 @@ def compute_dora_metrics(commits):
                 "value": df_per_week,
                 "unit": "deploys/week",
                 "dora_classification": "High (Weekly release cadence)",
-                "target_benchmarks": {"Elite": "> 7/wk", "High": "1-7/wk", "Medium": "1/mo - 1/wk", "Low": "< 1/mo"},
+                "target_benchmarks": {
+                    "Elite": "> 7/wk",
+                    "High": "1-7/wk",
+                    "Medium": "1/mo - 1/wk",
+                    "Low": "< 1/mo",
+                },
             },
             "lead_time_for_changes": {
                 "value_hours": mean_lead_time_hours,
                 "value_days": mean_lead_time_days,
                 "unit": "days",
                 "dora_classification": "High (1-7 days)",
-                "target_benchmarks": {"Elite": "< 1 day", "High": "1-7 days", "Medium": "1-4 weeks", "Low": "> 1 month"},
+                "target_benchmarks": {
+                    "Elite": "< 1 day",
+                    "High": "1-7 days",
+                    "Medium": "1-4 weeks",
+                    "Low": "> 1 month",
+                },
             },
             "change_failure_rate": {
                 "value_percent": cfr_pct,
@@ -117,7 +131,11 @@ def compute_dora_metrics(commits):
                 "value_hours": round(mttr_minutes / 60.0, 2),
                 "unit": "minutes",
                 "dora_classification": "High (< 1 hour)",
-                "target_benchmarks": {"Elite/High": "< 1 hour", "Medium": "< 1 day", "Low": "> 1 week"},
+                "target_benchmarks": {
+                    "Elite/High": "< 1 hour",
+                    "Medium": "< 1 day",
+                    "Low": "> 1 week",
+                },
             },
         },
         "overall_performance_level": "High Performer",
@@ -144,59 +162,161 @@ def render_dashboard(metrics, output_path: str):
     ax1 = axes[0, 0]
     ax1.set_facecolor("#ffffff")
     df_val = metrics["metrics"]["deployment_frequency"]["value"]
-    bars1 = ax1.bar(["Практика-Трекер\n(Текущее)", "DORA Medium\n(Порог)", "DORA High\n(Цель)"], [df_val, 0.25, 1.5], color=["#2563eb", "#94a3b8", "#10b981"], width=0.5)
-    ax1.set_title("1. Deployment Frequency (Частота релизов)", fontsize=11, fontweight="bold", pad=10)
+    bars1 = ax1.bar(
+        ["Практика-Трекер\n(Текущее)", "DORA Medium\n(Порог)", "DORA High\n(Цель)"],
+        [df_val, 0.25, 1.5],
+        color=["#2563eb", "#94a3b8", "#10b981"],
+        width=0.5,
+    )
+    ax1.set_title(
+        "1. Deployment Frequency (Частота релизов)", fontsize=11, fontweight="bold", pad=10
+    )
     ax1.set_ylabel("Релизов в неделю", fontsize=10)
     ax1.set_ylim(0, 2.5)
     ax1.grid(axis="y", linestyle="--", alpha=0.5)
     for bar in bars1:
         yval = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width() / 2, yval + 0.08, f"{yval:.2f}/нед", ha="center", va="bottom", fontsize=10, fontweight="bold")
-    ax1.text(0.5, 0.15, "Класс: High (1.67 релиза/нед)", transform=ax1.transAxes, ha="center", bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8), fontsize=9)
+        ax1.text(
+            bar.get_x() + bar.get_width() / 2,
+            yval + 0.08,
+            f"{yval:.2f}/нед",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            fontweight="bold",
+        )
+    ax1.text(
+        0.5,
+        0.15,
+        "Класс: High (1.67 релиза/нед)",
+        transform=ax1.transAxes,
+        ha="center",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8),
+        fontsize=9,
+    )
 
     # 2. Lead Time for Changes (Bar chart with time in hours)
     ax2 = axes[0, 1]
     ax2.set_facecolor("#ffffff")
     lttc_h = metrics["metrics"]["lead_time_for_changes"]["value_hours"]
-    bars2 = ax2.bar(["Практика-Трекер\n(Текущее)", "DORA High\n(Порог 7 дн.)", "DORA Elite\n(Цель 24 ч.)"], [lttc_h, 168.0, 24.0], color=["#2563eb", "#94a3b8", "#10b981"], width=0.5)
-    ax2.set_title("2. Lead Time for Changes (Время доставки изменений)", fontsize=11, fontweight="bold", pad=10)
+    bars2 = ax2.bar(
+        ["Практика-Трекер\n(Текущее)", "DORA High\n(Порог 7 дн.)", "DORA Elite\n(Цель 24 ч.)"],
+        [lttc_h, 168.0, 24.0],
+        color=["#2563eb", "#94a3b8", "#10b981"],
+        width=0.5,
+    )
+    ax2.set_title(
+        "2. Lead Time for Changes (Время доставки изменений)",
+        fontsize=11,
+        fontweight="bold",
+        pad=10,
+    )
     ax2.set_ylabel("Часы от коммита до продакшена", fontsize=10)
     ax2.set_yscale("log")
     ax2.set_ylim(10, 300)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     for bar in bars2:
         yval = bar.get_height()
-        ax2.text(bar.get_x() + bar.get_width() / 2, yval * 1.15, f"{int(yval)} ч ({round(yval/24, 1)} дн)", ha="center", va="bottom", fontsize=9, fontweight="bold")
-    ax2.text(0.5, 0.15, "Класс: High (31.9 ч = 1.33 дня)", transform=ax2.transAxes, ha="center", bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8), fontsize=9)
+        ax2.text(
+            bar.get_x() + bar.get_width() / 2,
+            yval * 1.15,
+            f"{int(yval)} ч ({round(yval / 24, 1)} дн)",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            fontweight="bold",
+        )
+    ax2.text(
+        0.5,
+        0.15,
+        "Класс: High (31.9 ч = 1.33 дня)",
+        transform=ax2.transAxes,
+        ha="center",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8),
+        fontsize=9,
+    )
 
     # 3. Change Failure Rate (Horizontal bar / gauge)
     ax3 = axes[1, 0]
     ax3.set_facecolor("#ffffff")
     cfr_val = metrics["metrics"]["change_failure_rate"]["value_percent"]
-    bars3 = ax3.barh(["DORA Low (>30%)", "DORA Medium (16-30%)", "DORA High (<15%)", "Практика-Трекер"], [40, 25, 15, cfr_val], color=["#f87171", "#fbbf24", "#34d399", "#2563eb"], height=0.5)
-    ax3.set_title("3. Change Failure Rate (Доля сбоев при релизе)", fontsize=11, fontweight="bold", pad=10)
+    bars3 = ax3.barh(
+        ["DORA Low (>30%)", "DORA Medium (16-30%)", "DORA High (<15%)", "Практика-Трекер"],
+        [40, 25, 15, cfr_val],
+        color=["#f87171", "#fbbf24", "#34d399", "#2563eb"],
+        height=0.5,
+    )
+    ax3.set_title(
+        "3. Change Failure Rate (Доля сбоев при релизе)", fontsize=11, fontweight="bold", pad=10
+    )
     ax3.set_xlabel("% релизов с дефектами", fontsize=10)
     ax3.set_xlim(0, 50)
     ax3.grid(axis="x", linestyle="--", alpha=0.5)
     for bar in bars3:
         xval = bar.get_width()
-        ax3.text(xval + 1.0, bar.get_y() + bar.get_height() / 2, f"{xval:.1f}%", ha="left", va="center", fontsize=9, fontweight="bold")
-    ax3.text(0.65, 0.25, "Класс: High (10.0%)", transform=ax3.transAxes, ha="center", bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8), fontsize=9)
+        ax3.text(
+            xval + 1.0,
+            bar.get_y() + bar.get_height() / 2,
+            f"{xval:.1f}%",
+            ha="left",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+        )
+    ax3.text(
+        0.65,
+        0.25,
+        "Класс: High (10.0%)",
+        transform=ax3.transAxes,
+        ha="center",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8),
+        fontsize=9,
+    )
 
     # 4. Time to Restore Service (MTTR)
     ax4 = axes[1, 1]
     ax4.set_facecolor("#ffffff")
     mttr_val = metrics["metrics"]["time_to_restore_service"]["value_minutes"]
-    bars4 = ax4.bar(["Практика-Трекер\n(Контейнер + DB)", "DORA High\n(Порог <60 мин)", "DORA Medium\n(<1440 мин)"], [mttr_val, 60.0, 1440.0], color=["#2563eb", "#10b981", "#94a3b8"], width=0.5)
-    ax4.set_title("4. Time to Restore Service / MTTR (Время восстановления)", fontsize=11, fontweight="bold", pad=10)
+    bars4 = ax4.bar(
+        [
+            "Практика-Трекер\n(Контейнер + DB)",
+            "DORA High\n(Порог <60 мин)",
+            "DORA Medium\n(<1440 мин)",
+        ],
+        [mttr_val, 60.0, 1440.0],
+        color=["#2563eb", "#10b981", "#94a3b8"],
+        width=0.5,
+    )
+    ax4.set_title(
+        "4. Time to Restore Service / MTTR (Время восстановления)",
+        fontsize=11,
+        fontweight="bold",
+        pad=10,
+    )
     ax4.set_ylabel("Минуты до полного восстановления", fontsize=10)
     ax4.set_yscale("log")
     ax4.set_ylim(5, 3000)
     ax4.grid(axis="y", linestyle="--", alpha=0.5)
     for bar in bars4:
         yval = bar.get_height()
-        ax4.text(bar.get_x() + bar.get_width() / 2, yval * 1.2, f"{yval:.1f} мин", ha="center", va="bottom", fontsize=9, fontweight="bold")
-    ax4.text(0.5, 0.15, "Класс: High (<1 час; факт 18.5 мин)", transform=ax4.transAxes, ha="center", bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8), fontsize=9)
+        ax4.text(
+            bar.get_x() + bar.get_width() / 2,
+            yval * 1.2,
+            f"{yval:.1f} мин",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            fontweight="bold",
+        )
+    ax4.text(
+        0.5,
+        0.15,
+        "Класс: High (<1 час; факт 18.5 мин)",
+        transform=ax4.transAxes,
+        ha="center",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="#dbeafe", edgecolor="#2563eb", alpha=0.8),
+        fontsize=9,
+    )
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     os.makedirs(os.path.dirname(output_path), exist_ok=True)

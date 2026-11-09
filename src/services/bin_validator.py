@@ -57,7 +57,10 @@ def validate_bin(bin_code: str) -> tuple[bool, str]:
         if s2 < 10:
             control_digit = s2
         else:
-            return False, "Недействительный БИН (контрольная сумма не формируется по алгоритму КГД МФ РК)"
+            return (
+                False,
+                "Недействительный БИН (контрольная сумма не формируется по алгоритму КГД МФ РК)",
+            )
 
     if control_digit != digits[11]:
         return False, (

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Практика-Трекер | ФИТ КазНУ имени аль-Фараби{% endblock %}</title>
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom Style -->
+  <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-kaznu shadow-sm py-2">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+          <div class="rounded-circle bg-white p-1 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+            <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
+          </div>
+          <div class="lh-sm">
+            <span class="fw-bold tracking-tight d-block fs-5">ПРАКТИКА-ТРЕКЕР</span>
+            <small class="text-white-50 fs-8 d-block" style="font-size: 0.72rem;">ФИТ КазНУ им. аль-Фараби · 2026</small>
+          </div>
+          <span class="badge brand-badge ms-2">MVP 1.0</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto ms-lg-4 mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link {% if active_page == 'home' %}active fw-semibold{% endif %}" href="/" data-i18n="nav_home">
+                <i class="bi bi-house-door me-1"></i> Главная
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if active_page == 'apply' %}active fw-semibold{% endif %}" href="/apply" data-i18n="nav_apply">
+                <i class="bi bi-pencil-square me-1"></i> Подать заявку
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if active_page == 'tracker' %}active fw-semibold{% endif %}" href="/tracker" data-i18n="nav_tracker">
+                <i class="bi bi-search me-1"></i> Трекер статуса
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if active_page == 'companies' %}active fw-semibold{% endif %}" href="/companies" data-i18n="nav_companies">
+                <i class="bi bi-building me-1"></i> Базы практики
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if active_page == 'coordinator' %}active fw-semibold{% endif %}" href="/coordinator" data-i18n="nav_coordinator">
+                <i class="bi bi-person-badge me-1"></i> Кабинет деканата
+              </a>
+            </li>
+          </ul>
+          <!-- Language & Right Links -->
+          <div class="d-flex align-items-center gap-2">
+            <div class="btn-group btn-group-sm" role="group">
+              <button type="button" class="btn btn-outline-light active" id="lang-ru" onclick="setLanguage('ru')">RU</button>
+              <button type="button" class="btn btn-outline-light" id="lang-kz" onclick="setLanguage('kz')">KZ</button>
+            </div>
+            <a href="/docs" target="_blank" class="btn btn-sm btn-outline-warning text-nowrap" title="Спецификация OpenAPI / Swagger">
+              <i class="bi bi-code-slash me-1"></i> API Docs
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;"></div>
+
+  <!-- Footer -->
+  <footer class="py-4 mt-5">
+    <div class="container">
+      <div class="row gy-3 align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <p class="mb-1 text-white fw-bold">Веб-сервис «Практика-Трекер» (MVP Релиз 1.0)</p>
+          <p class="mb-0 text-white-50 small">
+            Автоматизация производственной практики студентов факультета информационных технологий (250+ человек).
+          </p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <p class="mb-1 text-white-50 small">
+            Разработчик & PM: <span class="text-white fw-semibold">Сәбитов Азамат</span> (гр. АЖ-47)
+          </p>
+          <p class="mb-0 text-white-50 small">
+            КазНУ имени аль-Фараби · Дисциплина: «Управление ИТ-проектами» · 2026 г.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/ распределение/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom JS -->
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

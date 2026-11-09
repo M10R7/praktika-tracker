@@ -8,6 +8,16 @@ exclude = [
     "__pycache__",
 ]
 
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    "B008",  # FastAPI Depends in function argument defaults
+    "E501",  # Line too long (handled by formatter or natural prose strings)
+    "B905",  # zip() without explicit strict=
+    "UP042", # StrEnum backwards compatibility
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+

@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Базы практики (Партнеры) | Практика-Трекер ФИТ{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+      <h3 class="fw-bold mb-1">
+        <i class="bi bi-buildings text-primary me-2"></i> Реестр аккредитованных баз практики
+      </h3>
+      <p class="text-muted small mb-0">
+        Утвержденные компании-партнеры кафедр факультета информационных технологий КазНУ.
+      </p>
+    </div>
+    <div>
+      <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+        <i class="bi bi-plus-circle me-1"></i> Добавить базу практики (US-07)
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Filter -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+    <div class="input-group input-group-lg">
+      <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="company-search" class="form-control border-start-0" placeholder="Поиск по названию или 12-значному БИН компании..." oninput="debounce(loadCompanies, 300)()">
+    </div>
+  </div>
+
+  <!-- Companies Grid -->
+  <div class="row g-4" id="companies-grid">
+    <div class="col-12 text-center py-5 text-muted">
+      <div class="spinner-border text-primary me-2"></div> Загрузка каталога организаций...
+    </div>
+  </div>
+</div>
+
+<!-- Add Company Modal (US-07) -->
+<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-building-add text-primary me-2"></i> Добавление новой базы практики
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3">
+          БИН будет автоматически проверен на соответствие алгоритму контрольного разряда КГД МФ РК.
+        </p>
+        <form id="add-company-form" onsubmit="handleAddCompany(event)">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">БИН организации (12 цифр) <span class="text-danger">*</span></label>
+            <input type="text" id="new_bin" class="form-control font-monospace" placeholder="12 цифр" maxlength="12" pattern="\d{12}" onblur="checkNewBin(this)" required>
+            <div id="new-bin-feedback" class="form-text small"></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Наименование организации <span class="text-danger">*</span></label>
+            <input type="text" id="new_name" class="form-control" placeholder="Например: ТОО «Kolesa Group»" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Организационно-правовая форма</label>
+            <select id="new_legal_form" class="form-select">
+              <option value="ТОО" selected>ТОО (Товарищество с ограниченной ответственностью)</option>
+              <option value="АО">АО (Акционерное общество)</option>
+              <option value="РГП">РГП (Республиканское гос. предприятие)</option>
+              <option value="Филиал">Филиал иностранной компании</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Юридический адрес</label>
+            <input type="text" id="new_address" class="form-control" value="г. Алматы">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Контактное лицо (Куратор)</label>
+            <input type="text" id="new_contact_person" class="form-control" placeholder="ФИО контактного лица">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Контактный телефон</label>
+            <input type="tel" id="new_contact_phone" class="form-control" placeholder="+7 (727) ...">
+          </div>
+          <div class="d-grid mt-4">
+            <button type="submit" id="add-company-btn" class="btn btn-primary btn-lg">
+              <i class="bi bi-check-circle me-1"></i> Зарегистрировать компанию
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  loadCompanies();
+});
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+async function loadCompanies() {
+  const grid = document.getElementById("companies-grid");
+  const search = document.getElementById("company-search").value.trim();
+  let url = `/api/v1/companies?partner_only=false`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      const companies = await res.json();
+      if (!companies.length) {
+        grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">Организации не найдены</div>`;
+        return;
+      }
+      grid.innerHTML = companies.map(c => `
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                ${c.legal_form || 'ТОО'}
+              </span>
+              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                <i class="bi bi-shield-check me-1"></i> БИН КГД РК
+              </span>
+            </div>
+            <h5 class="fw-bold mb-1 text-dark">${c.name}</h5>
+            <div class="small font-monospace text-muted mb-3">БИН: ${c.bin}</div>
+
+            <div class="small text-secondary mb-3">
+              <div class="mb-1"><i class="bi bi-geo-alt me-1 text-muted"></i> ${c.address || 'г. Алматы'}</div>
+              ${c.contact_person ? `<div><i class="bi bi-person me-1 text-muted"></i> ${c.contact_person}</div>` : ''}
+              ${c.contact_phone ? `<div><i class="bi bi-telephone me-1 text-muted"></i> ${c.contact_phone}</div>` : ''}
+            </div>
+
+            <div class="mt-auto pt-2 border-top">
+              <a href="/apply" class="btn btn-sm btn-outline-primary w-100">
+                <i class="bi bi-pencil me-1"></i> Подать в эту организацию
+              </a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    grid.innerHTML = `<div class="col-12 text-center py-5 text-danger">Ошибка загрузки справочника</div>`;
+  }
+}
+
+function checkNewBin(input) {
+  const fb = document.getElementById("new-bin-feedback");
+  const val = input.value.trim();
+  if (val.length === 12) {
+    const check = validateBinLocal(val);
+    if (check.valid) {
+      input.classList.remove("is-invalid");
+      input.classList.add("is-valid");
+      fb.className = "form-text text-success";
+      fb.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${check.message}`;
+    } else {
+      input.classList.remove("is-valid");
+      input.classList.add("is-invalid");
+      fb.className = "form-text text-danger";
+      fb.innerHTML = `<i class="bi bi-x-circle me-1"></i> ${check.message}`;
+    }
+  }
+}
+
+async function handleAddCompany(e) {
+  e.preventDefault();
+  const btn = document.getElementById("add-company-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Проверка...`;
+
+  const payload = {
+    bin: document.getElementById("new_bin").value.trim(),
+    name: document.getElementById("new_name").value.trim(),
+    legal_form: document.getElementById("new_legal_form").value,
+    address: document.getElementById("new_address").value.trim(),
+    contact_person: document.getElementById("new_contact_person").value.trim(),
+    contact_phone: document.getElementById("new_contact_phone").value.trim(),
+    is_partner: true,
+  };
+
+  try {
+    const res = await fetch("/api/v1/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      showToast(`Компания ${payload.name} успешно добавлена!`, "success");
+      bootstrap.Modal.getInstance(document.getElementById("addCompanyModal")).hide();
+      document.getElementById("add-company-form").reset();
+      loadCompanies();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || "Ошибка добавления", "error");
+    }
+  } catch (err) {
+    showToast("Сбой соединения", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-check-circle me-1"></i> Зарегистрировать компанию`;
+  }
+}
+</script>
+{% endblock %}

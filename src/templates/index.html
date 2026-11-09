@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Главная | Практика-Трекер ФИТ КазНУ{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-7">
+        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold mb-2 px-3 py-2 rounded-pill">
+          <i class="bi bi-shield-check me-1"></i> Официальная платформа ФИТ КазНУ им. аль-Фараби
+        </span>
+        <h1 class="display-5 fw-bold text-dark lh-tight mb-3" data-i18n="hero_title">
+          Сквозное управление производственной практикой
+        </h1>
+        <p class="lead text-muted mb-4" data-i18n="hero_sub">
+          Автоматизированная подача заявлений, верификация БИН баз практики по алгоритму КГД МФ РК,
+          генерация типовых трехсторонних договоров (МОН РК № 107) и сводных проектов приказов деканата.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="/apply" class="btn btn-primary btn-lg px-4 shadow-sm">
+            <i class="bi bi-pencil-square me-2"></i> Подать заявку
+          </a>
+          <a href="/tracker" class="btn btn-outline-secondary btn-lg px-4">
+            <i class="bi bi-search me-2"></i> Проверить статус
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <!-- Quick Status Lookup Card -->
+        <div class="card border-0 shadow-lg rounded-4 p-4 bg-white">
+          <div class="d-flex align-items-center mb-3">
+            <div class="rounded-3 bg-primary bg-opacity-10 p-2 text-primary me-3">
+              <i class="bi bi-search fs-4"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0">Быстрая проверка статуса</h5>
+              <small class="text-muted">Введите 12 цифр ИИН студента</small>
+            </div>
+          </div>
+          <form id="quick-tracker-form" onsubmit="handleQuickTrack(event)">
+            <div class="input-group mb-3">
+              <input type="text" id="quick-iin" class="form-control form-control-lg" placeholder="Например: 030514500012" maxlength="12" pattern="\d{12}" required>
+              <button class="btn btn-primary px-3" type="submit">
+                <i class="bi bi-arrow-right fs-5"></i>
+              </button>
+            </div>
+            <div id="quick-result" class="d-none mt-2 p-3 rounded-3 bg-light border">
+              <!-- Result injected via JS -->
+            </div>
+          </form>
+          <small class="text-muted">
+            <i class="bi bi-shield-lock me-1"></i> Конфиденциально: персональные данные маскируются (SEC-01).
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live Telemetry Stats Section -->
+<section class="py-5 bg-white border-bottom">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold">Текущий ход кампании практики (2026-2027)</h3>
+      <p class="text-muted">Мониторинг академической квоты и распределения студентов 4 курса</p>
+    </div>
+    <div class="row g-4" id="stats-container">
+      <div class="col-md-3 col-sm-6">
+        <div class="p-4 stat-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small fw-bold text-uppercase">Целевая квота</span>
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+              <i class="bi bi-people-fill"></i>
+            </div>
+          </div>
+          <h2 class="display-6 fw-bold mb-0" id="stat-target">250</h2>
+          <small class="text-muted">студентов 4 курса ФИТ</small>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="p-4 stat-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small fw-bold text-uppercase">Подано заявок</span>
+            <div class="stat-icon bg-info bg-opacity-10 text-info">
+              <i class="bi bi-file-earmark-text-fill"></i>
+            </div>
+          </div>
+          <h2 class="display-6 fw-bold mb-0" id="stat-total">--</h2>
+          <small class="text-muted" id="stat-pending-label">в процессе обработки</small>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="p-4 stat-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small fw-bold text-uppercase">Согласовано & В приказе</span>
+            <div class="stat-icon bg-success bg-opacity-10 text-success">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+          </div>
+          <h2 class="display-6 fw-bold mb-0 text-success" id="stat-approved">--</h2>
+          <small class="text-muted" id="stat-coverage-label">охват квоты: --%</small>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="p-4 stat-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small fw-bold text-uppercase">Баз практики</span>
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+              <i class="bi bi-building-fill"></i>
+            </div>
+          </div>
+          <h2 class="display-6 fw-bold mb-0" id="stat-companies">--</h2>
+          <small class="text-muted">аккредитованных партнеров</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Functional Blocks for Roles -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4 p-4">
+          <div class="d-flex align-items-center mb-3">
+            <span class="badge bg-primary px-3 py-2 rounded-pill me-2">Студенту</span>
+            <h4 class="fw-bold mb-0">Подача и получение документов</h4>
+          </div>
+          <ul class="list-unstyled mb-4 space-y-2">
+            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Онлайн-подача без необходимости визита в деканат (US-01)</li>
+            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Проверка БИН предприятия по базам КГД РК прямо при вводе (US-04)</li>
+            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Автоматическая генерация трехстороннего договора DOCX (US-09)</li>
+            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Загрузка скана подписанного соглашения (US-08)</li>
+          </ul>
+          <div class="mt-auto">
+            <a href="/apply" class="btn btn-outline-primary">Перейти к оформлению &rarr;</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4 p-4">
+          <div class="d-flex align-items-center mb-3">
+            <span class="badge bg-dark px-3 py-2 rounded-pill me-2">Координатору & Деканату</span>
+            <h4 class="fw-bold mb-0">Управление потоком и выпуск приказов</h4>
+          </div>
+          <ul class="list-unstyled mb-4 space-y-2">
+            <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i> Очередь заявлений с фильтрами по группам (АЖ-47, ИС-41 и др.) (US-05)</li>
+            <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i> Согласование и отклонение с обязательной фиксацией причины (US-06)</li>
+            <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i> Сборка сводного проекта приказа деканата в DOCX за 3 секунды (US-11)</li>
+            <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i> Неизменяемый журнал аудита действий и выгрузка в CSV (SEC-02, US-10)</li>
+          </ul>
+          <div class="mt-auto">
+            <a href="/coordinator" class="btn btn-outline-dark">Кабинет координатора &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("/api/v1/stats");
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById("stat-target").textContent = data.target_quota;
+      document.getElementById("stat-total").textContent = data.total_applications;
+      document.getElementById("stat-approved").textContent = data.distributed_count;
+      document.getElementById("stat-companies").textContent = data.total_companies;
+      document.getElementById("stat-coverage-label").textContent = `Охват квоты: ${data.coverage_percentage}%`;
+      document.getElementById("stat-pending-label").textContent = `На проверке: ${data.under_review_count}`;
+    }
+  } catch (err) {
+    console.error("Failed to load telemetry stats:", err);
+  }
+});
+
+async function handleQuickTrack(e) {
+  e.preventDefault();
+  const iin = document.getElementById("quick-iin").value.trim();
+  const resultDiv = document.getElementById("quick-result");
+
+  resultDiv.classList.remove("d-none");
+  resultDiv.innerHTML = `<div class="spinner-border spinner-border-sm text-primary me-2"></div> Поиск статуса по ИИН...`;
+
+  try {
+    const res = await fetch(`/api/v1/tracker?iin=${encodeURIComponent(iin)}`);
+    if (res.ok) {
+      const data = await res.json();
+      resultDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <strong class="d-block text-dark">${data.masked_student_name}</strong>
+            <small class="text-muted">Заявка № ${data.application_number}</small>
+          </div>
+          <span class="badge badge-status-${data.status} p-2">${data.status_label_ru}</span>
+        </div>
+        <p class="small text-secondary mb-2"><i class="bi bi-building me-1"></i> ${data.company_name}</p>
+        <div class="d-flex gap-2">
+          <a href="/tracker?iin=${encodeURIComponent(iin)}" class="btn btn-sm btn-primary">
+            <i class="bi bi-eye me-1"></i> Полный трекер
+          </a>
+        </div>
+      `;
+    } else {
+      const err = await res.json();
+      resultDiv.innerHTML = `<span class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i> ${err.detail || "Заявка не найдена"}</span>`;
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `<span class="text-danger small">Сбой соединения с сервером</span>`;
+  }
+}
+</script>
+{% endblock %}
