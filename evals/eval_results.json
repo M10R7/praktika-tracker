@@ -1,0 +1,144 @@
+{
+  "dataset_size": 36,
+  "labels": [
+    "CONTRACT_SIGN",
+    "STATUS_TRACK",
+    "COMPANY_BIN",
+    "SCAN_UPLOAD",
+    "ESCALATE_COMPLEX"
+  ],
+  "tokens": {
+    "encoding": "cl100k_base",
+    "system_prompt_tokens": 697,
+    "avg_user_tokens": 67.69,
+    "avg_total_input_tokens": 764.69,
+    "avg_output_tokens": 2.8
+  },
+  "models": {
+    "rule_based": {
+      "accuracy": 0.75,
+      "macro_f1": 0.7277,
+      "avg_latency_ms": 0.0035
+    },
+    "tfidf_linearsvc_cv": {
+      "accuracy": 0.4167,
+      "macro_f1": 0.3581,
+      "avg_latency_ms": 0.608
+    },
+    "llm_gpt_oss_20b": {
+      "accuracy": 0.9167,
+      "macro_f1": 0.9051,
+      "batch_latencies_sec": [
+        14.22,
+        14.35,
+        15.5
+      ],
+      "single_request_observed_sec": 4.75,
+      "confusion_matrix": [
+        [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          4,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          7,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          6
+        ]
+      ],
+      "classification_report": {
+        "CONTRACT_SIGN": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "STATUS_TRACK": {
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1-score": 0.9411764705882353,
+          "support": 8.0
+        },
+        "COMPANY_BIN": {
+          "precision": 1.0,
+          "recall": 0.5714285714285714,
+          "f1-score": 0.7272727272727273,
+          "support": 7.0
+        },
+        "SCAN_UPLOAD": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 7.0
+        },
+        "ESCALATE_COMPLEX": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1-score": 0.8571428571428571,
+          "support": 6.0
+        },
+        "accuracy": 0.9166666666666666,
+        "macro avg": {
+          "precision": 0.9277777777777778,
+          "recall": 0.9142857142857143,
+          "f1-score": 0.905118411000764,
+          "support": 36.0
+        },
+        "weighted avg": {
+          "precision": 0.933641975308642,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.9100882777353365,
+          "support": 36.0
+        }
+      },
+      "errors": [
+        {
+          "id": 17,
+          "lang": "ru",
+          "text": "Хочу поменять место прохождения практики с Казтелекома на Halyk Bank, старую заявку как отменить?",
+          "true": "COMPANY_BIN",
+          "pred": "ESCALATE_COMPLEX"
+        },
+        {
+          "id": 19,
+          "lang": "ru",
+          "text": "У компании в списке неактуальный юридический адрес указан вместо проспекта Мангилик Ел, кому написать исправить?",
+          "true": "COMPANY_BIN",
+          "pred": "ESCALATE_COMPLEX"
+        },
+        {
+          "id": 20,
+          "lang": "ru",
+          "text": "Пробую выбрать Kaspi из списка партнеров, но форма почему-то пишет что у меня уже есть активная заявка.",
+          "true": "COMPANY_BIN",
+          "pred": "STATUS_TRACK"
+        }
+      ]
+    }
+  }
+}
