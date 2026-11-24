@@ -1,0 +1,112 @@
+{
+  "repo": "M10R7/praktika-tracker",
+  "report_date": "2026-11-24",
+  "total_repo_commits": 17,
+  "github_issues_count": 0,
+  "sprint_2": {
+    "period": "2026-10-27 — 2026-11-09",
+    "commits_count": 6,
+    "commits": [
+      {
+        "sha": "72e256e",
+        "date": "2026-11-09",
+        "message": "refactor: rename university branding from KazNU to ENU Astana across codebase and docs"
+      },
+      {
+        "sha": "a2d415e",
+        "date": "2026-11-09",
+        "message": "docs: add MVP walkthrough and acceptance test report"
+      },
+      {
+        "sha": "f4090d9",
+        "date": "2026-11-09",
+        "message": "feat(mvp): implement full-cycle MVP for internship management platform"
+      },
+      {
+        "sha": "caaa312",
+        "date": "2026-11-03",
+        "message": "chore(dora): add GitHub Actions API fetch support matching benchmark"
+      },
+      {
+        "sha": "30c2c6f",
+        "date": "2026-11-03",
+        "message": "feat(devops): add CI/CD pipeline, DORA dashboard, branch protection, and release plan (LZ 10)"
+      },
+      {
+        "sha": "d75a793",
+        "date": "2026-10-27",
+        "message": "feat(process): add 2-sprint simulation, flow metrics (CFD, Little's Law), and retrospective protocol (LZ 9)"
+      }
+    ]
+  },
+  "sprint_3": {
+    "period": "2026-11-10 — 2026-11-24",
+    "commits_count": 2,
+    "commits": [
+      {
+        "sha": "4d8ec56",
+        "date": "2026-11-17",
+        "message": "docs(ai): add Lab 12 AI feature card, 36-sample evals, token economics and ADR-002"
+      },
+      {
+        "sha": "cb36dd1",
+        "date": "2026-11-10",
+        "message": "docs(qa,ops): add test strategy, UAT protocol, postmortem and runbook for Lab 11"
+      }
+    ]
+  },
+  "ci_cd": {
+    "total_runs": 6,
+    "success_count": 0,
+    "failure_count": 6,
+    "latest_run_status": "failure",
+    "latest_run_date": "2026-11-17"
+  },
+  "backlog_risk_radar": [
+    {
+      "id": "CI-FIX-01",
+      "title": "Исправить падения GitHub Actions CI workflow (6 runs failed)",
+      "created": "2026-11-03",
+      "priority": "Blocker",
+      "status": "In Progress",
+      "age_days": 21,
+      "is_stale": true
+    },
+    {
+      "id": "TECH-TASK-41",
+      "title": "Вынос генерации DOCX в фоновые задачи BackgroundTasks",
+      "created": "2026-11-12",
+      "priority": "High",
+      "status": "To Do",
+      "age_days": 12,
+      "is_stale": false
+    },
+    {
+      "id": "TECH-TASK-42",
+      "title": "Переключение продакшн-стенда с SQLite на PostgreSQL 16",
+      "created": "2026-11-12",
+      "priority": "High",
+      "status": "To Do",
+      "age_days": 12,
+      "is_stale": false
+    },
+    {
+      "id": "AI-01",
+      "title": "Интеграция AI Practice Triage + PII-Redactor (Release 2.0)",
+      "created": "2026-11-17",
+      "priority": "Medium",
+      "status": "Planned",
+      "age_days": 7,
+      "is_stale": false
+    },
+    {
+      "id": "US-15",
+      "title": "Расширенный личный кабинет студента с архивом за 4 курса",
+      "created": "2026-10-06",
+      "priority": "Low",
+      "status": "Backlog",
+      "age_days": 49,
+      "is_stale": true
+    }
+  ]
+}

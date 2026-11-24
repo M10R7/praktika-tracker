@@ -1,0 +1,40 @@
+name: Weekly Solo PM AI Status Report
+
+on:
+  schedule:
+    # Запуск каждую пятницу в 10:00 UTC (15:00 по времени г. Астана)
+    - cron: '0 10 * * 5'
+  workflow_dispatch: # Кнопка ручного запуска в интерфейсе GitHub Actions
+
+permissions:
+  contents: read
+
+jobs:
+  generate-status-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install minimal dependencies
+        run: pip install requests
+
+      - name: Run PM Weekly Status Assistant
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python scripts/pm_weekly_assistant.py
+
+      - name: Upload Draft Status Report & Raw Facts Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pm-weekly-status-draft
+          path: |
+            docs/reports/raw_github_facts.json
+            docs/reports/weekly_status_sprint2_3.md
+          retention-days: 30
